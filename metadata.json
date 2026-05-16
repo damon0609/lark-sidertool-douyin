@@ -1,0 +1,5 @@
+{
+  "name": "Data Collection Dashboard",
+  "description": "A modular dashboard for managing data collection tasks and status monitoring.",
+  "requestFramePermissions": []
+}
