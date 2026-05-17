@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://www.douyin-spider.damonai.top/douyin-spider';
+const API_BASE_URL = 'https://sd83ukopdo72q591c8nug.apigateway-cn-beijing.volceapi.com/douyin-spider';
 
 interface ApiResponse<T = any> {
   success?: boolean;
@@ -60,9 +60,7 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
         ...options.headers,
       },
     });
-
     clearTimeout(timeoutId);
-
     if (!response.ok) {
       if (response.status === 502) {
         const errorData = await response.json().catch(() => ({}));
