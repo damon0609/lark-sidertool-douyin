@@ -1,6 +1,4 @@
-const API_BASE_URL = import.meta.env.PROD
-  ? 'http://www.douyin-spider.damonai.top'
-  : '/douyin-spider';
+const API_BASE_URL = 'https://sd83ukopdo72q591c8nug.apigateway-cn-beijing.volceapi.com/douyin-spider';
 
 interface ApiResponse<T = any> {
   success?: boolean;

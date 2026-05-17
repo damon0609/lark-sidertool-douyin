@@ -72,7 +72,6 @@ export default function CookiesModule() {
         
         const sourceText = status.source === 'memory' ? '内存' : 
                           status.source === 'environment' ? '环境变量' : '未知';
-        
         let statusMessage = `✅ Cookie 已初始化 (${sourceText})`;
         
         if (status.cookies_preview && status.cookies_preview !== '已设置(无sessionid)') {
