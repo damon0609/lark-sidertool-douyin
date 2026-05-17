@@ -146,18 +146,10 @@ export default function BatchCollectionModule() {
           currentStatus !== "待采" &&
           currentStatus !== "待采集"
         ) {
-          console.log(
-            `${index + 1}. 跳过（采集状态: ${currentStatus || "空"}）`,
-          );
-          if (index < allRecords.length - 1) {
-            console.log("---");
-          }
           continue;
         }
         try {
           const urlValue = await url_field.getValue(record.recordId);
-
-          // 提取实际链接文本
           let displayUrl: string;
           if (typeof urlValue === "string") {
             displayUrl = urlValue;
@@ -174,9 +166,16 @@ export default function BatchCollectionModule() {
             try {
               const workInfo = await getDouyinWorkInfo(displayUrl);
               let downloadUrl: string | string[] | null = null;
+              let userHomePageUrl: string | null = null;
+              console.log(workInfo);
               if (workInfo && workInfo.data) {
                 const awemeDetail = workInfo.data;
                 const awemeType = awemeDetail.aweme_type;
+                userHomePageUrl =
+                  "https://www.douyin.com/user/" +
+                    +workInfo.data.author.sec_uid || "";
+
+                console.log(workInfo.data.author);
 
                 if (awemeType === 0) {
                   const videoPlayAddr = awemeDetail?.video?.play_addr;
@@ -224,19 +223,30 @@ export default function BatchCollectionModule() {
                               downloadResult.data.file_name || "video.mp4";
                             const mimeType =
                               downloadResult.data.mime_type || "video/mp4";
-                            
-                            console.log(`   ✅ 视频下载成功！开始上传到作品字段...`);
-                            
+
+                            console.log(
+                              `   ✅ 视频下载成功！开始上传到作品字段...`,
+                            );
+
                             try {
                               const byteCharacters = atob(videoData);
-                              const byteNumbers = new Array(byteCharacters.length);
+                              const byteNumbers = new Array(
+                                byteCharacters.length,
+                              );
                               for (let i = 0; i < byteCharacters.length; i++) {
                                 byteNumbers[i] = byteCharacters.charCodeAt(i);
                               }
                               const byteArray = new Uint8Array(byteNumbers);
-                              const videoFile = new File([byteArray], fileName, { type: mimeType });
-                              
-                              await workAttachmentField.setValue(record.recordId, [videoFile]);
+                              const videoFile = new File(
+                                [byteArray],
+                                fileName,
+                                { type: mimeType },
+                              );
+
+                              await workAttachmentField.setValue(
+                                record.recordId,
+                                [videoFile],
+                              );
                               console.log(`   ✅ 视频已上传到作品字段！`);
                             } catch (uploadError) {
                               console.error(
@@ -292,13 +302,23 @@ export default function BatchCollectionModule() {
                                   "image/jpeg";
 
                                 const byteCharacters = atob(imgData);
-                                const byteNumbers = new Array(byteCharacters.length);
-                                for (let i = 0; i < byteCharacters.length; i++) {
+                                const byteNumbers = new Array(
+                                  byteCharacters.length,
+                                );
+                                for (
+                                  let i = 0;
+                                  i < byteCharacters.length;
+                                  i++
+                                ) {
                                   byteNumbers[i] = byteCharacters.charCodeAt(i);
                                 }
                                 const byteArray = new Uint8Array(byteNumbers);
-                                const imageFile = new File([byteArray], imgFileName, { type: imgMimeType });
-                                
+                                const imageFile = new File(
+                                  [byteArray],
+                                  imgFileName,
+                                  { type: imgMimeType },
+                                );
+
                                 downloadedImages.push(imageFile);
                                 console.log(
                                   `         ✅ 第 ${imgIndex + 1} 张图片下载成功`,
@@ -323,7 +343,10 @@ export default function BatchCollectionModule() {
                               `   ✅ 图片下载完成，共成功下载 ${downloadedImages.length} 张，开始上传到作品字段...`,
                             );
                             try {
-                              await workAttachmentField.setValue(record.recordId, downloadedImages);
+                              await workAttachmentField.setValue(
+                                record.recordId,
+                                downloadedImages,
+                              );
                               console.log(`   ✅ 图片已上传到作品字段！`);
                             } catch (imgUploadError) {
                               console.error(
@@ -349,27 +372,18 @@ export default function BatchCollectionModule() {
                   }
                 }
               }
-              let userHomePageUrl: string | null = null;
-              if (displayUrl.includes("/user/")) {
-                const match = displayUrl.match(
-                  /(https?:\/\/[^\/]+\/user\/[^?&]+)/,
-                );
-                if (match && match[1]) {
-                  userHomePageUrl = match[1];
-                }
-              }
 
               if (userHomePageUrl) {
                 try {
                   const userInfo = await getUserInfo(userHomePageUrl);
                   if (userInfo && userInfo.data) {
                     const userData = userInfo.data;
+                    console.log("   ✅ 用户信息获取成功:", userData);
                     try {
                       const fieldsToUpdate: Record<string, any> = {};
                       if (accountNameField && userData.nickname) {
                         fieldsToUpdate[accountNameField.id] = userData.nickname;
                       }
-
                       if (douyinIdField && userData.unique_id) {
                         fieldsToUpdate[douyinIdField.id] = userData.unique_id;
                       }
@@ -382,12 +396,10 @@ export default function BatchCollectionModule() {
                         const genderText = userData.gender === 1 ? "男" : "女";
                         fieldsToUpdate[genderField.id] = genderText;
                       }
-
                       if (totalFavoritedField && userData.total_favorited) {
                         fieldsToUpdate[totalFavoritedField.id] =
                           userData.total_favorited;
                       }
-
                       if (followerCountField && userData.follower_count) {
                         fieldsToUpdate[followerCountField.id] =
                           userData.follower_count;
@@ -397,7 +409,6 @@ export default function BatchCollectionModule() {
                         fieldsToUpdate[awemeCountField.id] =
                           userData.aweme_count;
                       }
-
                       if (Object.keys(fieldsToUpdate).length > 0) {
                         await table.setRecord(record.recordId, {
                           fields: fieldsToUpdate,
@@ -438,7 +449,6 @@ export default function BatchCollectionModule() {
                       },
                     });
                   }
-                  console.log("");
                 } catch (updateError) {
                   console.error("   ❌ 填充字段或更新状态失败:");
                   console.error(
@@ -487,7 +497,6 @@ export default function BatchCollectionModule() {
       alert(`失败: ${error instanceof Error ? error.message : "未知错误"}`);
     }
   };
-
   return (
     <div className="relative bg-[#f0f4f8] border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
       {/* Header */}

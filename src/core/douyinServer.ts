@@ -126,9 +126,8 @@ export async function refreshCookie(cookies: string): Promise<SetCookieResponse>
   if (!cookies || !cookies.trim()) {
     throw new Error('Cookies不能为空');
   }
-  
   const result = await request<SetCookieResponse>(`${API_BASE_URL}/auth/refresh-cookie`, {
-    method: 'PUT',
+    method: 'POST',
     body: JSON.stringify({ cookies: cookies.trim() }),
   });
   
@@ -137,7 +136,7 @@ export async function refreshCookie(cookies: string): Promise<SetCookieResponse>
 
 export async function clearCookie(): Promise<ClearCookieResponse> {
   return request<ClearCookieResponse>(`${API_BASE_URL}/auth/clear-cookie`, {
-    method: 'DELETE',
+    method: 'POST',
   });
 }
 
@@ -147,6 +146,10 @@ export async function getCookieStatus(): Promise<CookieStatusResponse> {
 
 export async function healthCheck(): Promise<HealthCheckResponse> {
   return request<HealthCheckResponse>(`${API_BASE_URL}/health`);
+}
+
+export async function getCollectList(): Promise<any> {
+  return request(`${API_BASE_URL}/collect/list`);
 }
 
 export async function searchVideos(params: SearchRequest): Promise<any> {
