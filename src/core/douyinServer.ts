@@ -1,4 +1,6 @@
-const API_BASE_URL = '/douyin-spider';
+const API_BASE_URL = import.meta.env.PROD
+  ? 'http://www.douyin-spider.damonai.top'
+  : '/douyin-spider';
 
 interface ApiResponse<T = any> {
   success?: boolean;

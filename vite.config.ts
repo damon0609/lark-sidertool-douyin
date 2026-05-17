@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
             'Connection': 'close',
           },
-          rewrite: (path) => path.replace(/^\/douyin-spider/, '/douyin-spider'),
+          rewrite: (path) => path,
           configure: (proxy, options) => {
             proxy.on('error', (err: NodeJS.ErrnoException, req, res) => {
               console.log('proxy error', err);
